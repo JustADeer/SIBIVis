@@ -7,7 +7,9 @@ import cv2
 from mediapipe import solutions as mps
 from time import sleep
 
-from joblib import load
+import processor
+
+from joblib import load as jlload
 
 mps_drawing = mps.drawing_utils
 
@@ -37,8 +39,9 @@ def recognize_hand() -> None:
 
     hands = mps.hands.Hands(static_image_mode=True, max_num_hands=1, min_detection_confidence=0.5)
 
-    model = load('svc_model_20250928.pkl')
-    scaler = load('svc_scaler_20250928.pkl')
+    
+    model = jlload('model/svc_model_20251004.pkl')
+    scaler = jlload('model/svc_scaler_20251004.pkl')
 
     while True:
         ret_val, img = capture.read()
@@ -49,15 +52,18 @@ def recognize_hand() -> None:
 
         # Open Camera View
         img = cv2.flip(img, 1)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        p_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         # Recognition
-        results = hands.process(img)
+        results = hands.process(p_img)
         if results.multi_hand_landmarks:
             landmarks = extract_hand_landmarks(results)
-            if landmarks.shape == (60,):
+            rot = processor.calc_finger_rot(landmarks)
+            landmarks = np.concatenate([landmarks, rot])
+            if landmarks.shape == (65,):
                 scaled_data = scaler.transform(landmarks.reshape(1, -1))
-                print(f"Predicted Sign: {str(model.predict(scaled_data)).upper()}", end='\r')
+                prediction = model.predict(scaled_data)
+                print(f"Predicted Sign: {str(prediction).upper()}", end='\r')
             for hand_landmarks in results.multi_hand_landmarks:
                 mps_drawing.draw_landmarks(img, hand_landmarks, mps.hands.HAND_CONNECTIONS)
         

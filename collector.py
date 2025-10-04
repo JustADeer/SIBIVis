@@ -61,9 +61,9 @@ def collect_hand_sign_data(label: str) -> None:
         cv2.imshow('SIBIVis', img)
 
         # Add if hand_arr row has exceeded 300
-        print(hand_arr.shape[0])
-        if hand_arr.shape[0] >= 300: # Fix this
-            print(f'Collected 300 samples for label "{label}"')
+        print(hand_arr.shape[0], ' ', (hand_arr.shape[0]/10), '%', end='\r')
+        if hand_arr.shape[0] >= 1000: # Fix this
+            print(f'Collected 1000 samples for label "{label}"')
             break
 
         # Exit Route
