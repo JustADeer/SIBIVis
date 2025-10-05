@@ -59,7 +59,7 @@ pip install opencv-python mediapipe scikit-learn pandas numpy joblib
 
 ## License
 
-MIT License
+GPL-3.0 License
 
 ---
 
